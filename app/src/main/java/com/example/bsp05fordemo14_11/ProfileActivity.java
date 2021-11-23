@@ -14,7 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "switch_preferences";
@@ -44,18 +46,18 @@ public class ProfileActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         boolean silent_gluten = settings.getBoolean("switch_gluten", false);
         switch_gluten.setChecked(silent_gluten);
-        Log.d("PREF_SWITCH_GLUTEN", String.valueOf(silent_gluten));
-        Log.d("REAL_SWITCH_GLUTEN", String.valueOf(switch_gluten));
+        //Log.d("PREF_SWITCH_GLUTEN", String.valueOf(silent_gluten));
+        //Log.d("REAL_SWITCH_GLUTEN", String.valueOf(switch_gluten));
+        if (switch_gluten.isChecked()){ allergens.add("gluten");}
 
         boolean silent_lactose = settings.getBoolean("switch_lactose", false);
         switch_lactose.setChecked(silent_lactose);
-        Log.d("PREF_SWITCH_LACTOSE", String.valueOf(silent_lactose));
-        Log.d("REAL_SWITCH_LACTOSE", String.valueOf(switch_lactose));
+        if (switch_lactose.isChecked()){ allergens.add("lactose");}
 
         boolean silent_eggs = settings.getBoolean("switch_eggs", false);
         switch_eggs.setChecked(silent_eggs);
-        Log.d("PREF_SWITCH_EGGS", String.valueOf(silent_eggs));
-        Log.d("REAL_SWITCH_EGGS", String.valueOf(switch_eggs));
+        if (switch_eggs.isChecked()){ allergens.add("eggs");}
+
 
         refreshAllergens();
 
