@@ -11,10 +11,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.View;
@@ -33,6 +35,8 @@ import java.io.IOException;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    static final String COMPLETED_ONBOARDING_PREF_NAME = "onboardingCompletion";
+
     private Button button_capture;
     private Button button_profile;
 
@@ -45,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CAMERA_CODE = 100;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -57,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
         textview_popup = findViewById(R.id.text_popup);
         image_result = findViewById(R.id.image_result);
         image_popup = findViewById(R.id.image_popup);
+
+        SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
+
+        if (!sharedPreferences.getBoolean(this.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+            // The user hasn't seen the OnboardingSupportFragment yet, so show it
+            startActivity(new Intent(getApplicationContext(),OnboardingActivity.class));
+        }
+
 
         if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
@@ -74,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
         button_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent= new Intent(getApplicationContext(),ProfileActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
             }
         });
     }
@@ -113,9 +125,10 @@ public class MainActivity extends AppCompatActivity {
                 stringBuilder.append("\n");
             }
 
-            textview_data.setText(stringBuilder.toString());
+            //textview_data.setText(stringBuilder.toString());
             button_capture.setText("Retake");
-            detectKeyword((String) textview_data.getText());
+            //detectKeyword((String) textview_data.getText());
+            detectKeyword((String) stringBuilder.toString());
         }
     }
 
@@ -125,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_warning_24));
         }
         else{
-            textview_popup.setText("Product does not contain allergens!");
+            textview_popup.setText("Product may not contain any of the allergens you have selected!");
             image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_24));
         }
     }
