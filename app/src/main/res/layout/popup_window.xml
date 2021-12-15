@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:id="@+id/popup_window_layout"
+    android:layout_width="match_parent"
+    android:layout_marginRight="16dp"
+    android:layout_marginLeft="16dp"
     android:layout_height="wrap_content"
     android:background="@color/grey">
 
-    <TextView
+    <ImageButton
+        android:id="@+id/close_popup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_baseline_close_24"/>
+
+    <ImageView
+        android:id="@+id/image_popup"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerHorizontal="true"
+        android:padding="8dp"/>
+
+    <TextView
+        android:id="@+id/text_popup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/image_popup"
+        android:text=""
         android:textSize="22sp"
-        android:text="test"/>
+        android:layout_centerHorizontal="true"
+        android:padding="16dp"/>
 
 </RelativeLayout>

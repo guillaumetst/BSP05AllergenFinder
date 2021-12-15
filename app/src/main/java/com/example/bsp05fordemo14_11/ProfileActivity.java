@@ -34,6 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
     TextView textView_test;
 
     private static List<String> userAllergens;
+    static Map<String, String[]> allergenKeywords = new HashMap<String, String[]>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         userAllergens = new ArrayList<String>();
         Map<SwitchCompat, String> allergenTypes = new HashMap<SwitchCompat, String>();
-        Map<String, String[]> allergenKeywords = new HashMap<String, String[]>();
 
 
         button_confirm = findViewById(R.id.button_confirm);
@@ -64,13 +64,13 @@ public class ProfileActivity extends AppCompatActivity {
         allergenTypes.put(switch_soy, "soy");
         allergenTypes.put(switch_nuts, "nuts");
 
-        allergenKeywords.put("gluten", new String[] {"gluten", "wheat", "flour"});
-        allergenKeywords.put( "lactose", new String[] {"lactose", "milk"});
-        allergenKeywords.put( "eggs", new String[] {});
-        allergenKeywords.put( "moluscs", new String[] {});
-        allergenKeywords.put( "fish", new String[] {});
-        allergenKeywords.put( "soy", new String[] {});
-        allergenKeywords.put( "nuts", new String[] {});
+        allergenKeywords.put("gluten", new String[] {"gluten", "wheat", "flour", "barley", "buckwheat", "buck-wheat", "rye", "cereal"});
+        allergenKeywords.put( "lactose", new String[] {"lactose", "milk", "butter", "buttermilk", "casein", "cheese", "cream", "custard", "ice-cream", "sour-cream", "whey", "yogurt"});
+        allergenKeywords.put( "eggs", new String[] {"eggs", "poultry", "egg-white", "yolk"});
+        allergenKeywords.put( "moluscs", new String[] {"moluscs"});
+        allergenKeywords.put( "fish", new String[] {"fish", "eel", "globfish", "mackerel", "percifomes", "salmon", "bass", "bream", "trout", "tuna", "tetraodontiformes", "shellfish", "shell"});
+        allergenKeywords.put( "soy", new String[] {"soy", "soybeans", "soy-beans"});
+        allergenKeywords.put( "nuts", new String[] {"nuts", "peanut", "almond", "chestnut", "ginkgo", "pecan", "walnut", "nut"});
 
         textView_test = findViewById(R.id.textView_test);
 
@@ -277,5 +277,13 @@ public class ProfileActivity extends AppCompatActivity {
             textView_test.setText("No allergens have been set!");
 
         }
+    }
+
+    public static ArrayList<String> returnUserAllergens(){
+        return (ArrayList<String>) userAllergens;
+    }
+
+    public static Map<String, String[]> returnAllergens(){
+        return allergenKeywords;
     }
 }

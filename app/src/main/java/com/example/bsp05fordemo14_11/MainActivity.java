@@ -18,10 +18,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +40,10 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     static final String COMPLETED_ONBOARDING_PREF_NAME = "onboardingCompletion";
@@ -41,13 +52,15 @@ public class MainActivity extends AppCompatActivity {
     private Button button_profile;
 
     private TextView textview_data;
-    private TextView textview_popup;
     private Bitmap bitmap;
 
     private ImageView image_result;
     private ImageView image_popup;
+    private TextView text_popup;
+    private RelativeLayout popup_window_layout;
 
     private static final int REQUEST_CAMERA_CODE = 100;
+
 
 
     @Override
@@ -55,13 +68,11 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Log.d("wtf", "lol");
         button_capture = findViewById(R.id.button_capture);
         button_profile = findViewById(R.id.button_profile);
         textview_data = findViewById(R.id.text_data);
-        textview_popup = findViewById(R.id.text_popup);
         image_result = findViewById(R.id.image_result);
-        image_popup = findViewById(R.id.image_popup);
 
         SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
 
@@ -132,14 +143,72 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void detectKeyword(String text){
-        if (text.toLowerCase(Locale.ROOT).contains("gluten")){
-            textview_popup.setText("Product contains gluten!!");
-            image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_warning_24));
+    private void detectKeyword(String text) {
+
+        /* https://stackoverflow.com/questions/5944987/how-to-create-a-popup-window-popupwindow-in-android */
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_window, null);
+        ImageButton close_popup = popupView.findViewById(R.id.close_popup);
+        image_popup = popupView.findViewById(R.id.image_popup);
+        text_popup = popupView.findViewById(R.id.text_popup);
+        popup_window_layout = popupView.findViewById(R.id.popup_window_layout);
+
+
+        ArrayList<String> userAllergens = ProfileActivity.returnUserAllergens();
+        Map<String, String[]> allergenKeywords = ProfileActivity.returnAllergens();
+
+        Integer counter = 0;
+
+        for(Map.Entry<String, String[]> entry : allergenKeywords.entrySet())
+        {
+            String key = entry.getKey();
+
+            if(userAllergens.contains(key))
+            {
+                for (String value : entry.getValue())
+                {
+                    if (text.toLowerCase(Locale.ROOT).contains(value))
+                    {
+                        counter += 1;
+                        String modifyText;
+                        modifyText = text_popup.getText().toString();
+                        modifyText = modifyText + String.format("Product contains %s!\n", key);
+                        text_popup.setText(modifyText);
+                        userAllergens.remove(new String(key));
+                        break;
+                    }
+                }
+            }
         }
-        else{
-            textview_popup.setText("Product may not contain any of the allergens you have selected!");
+        if(counter==0){
+            text_popup.setText("Product does not seem to contain any of the selected allergens!");
             image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_24));
+            popup_window_layout.setBackgroundColor(getResources().getColor(R.color.green_pastel));
+
+        }else{
+            image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_warning_24));
+            popup_window_layout.setBackgroundColor(getResources().getColor(R.color.red_pastel));
         }
+
+
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        popupWindow.showAtLocation(image_result, Gravity.CENTER, 0, 0);
+
+        // dismiss the popup window when touched
+        close_popup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
     }
 }

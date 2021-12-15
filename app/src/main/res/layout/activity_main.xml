@@ -106,26 +106,26 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/text_data"
         android:layout_marginTop="16dp" />
+    <!--
+        <TextView
+            android:id="@+id/text_popup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/linear_holder"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text=""
+            android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/text_popup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/linear_holder"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"
-        android:text=""
-        android:textSize="20sp" />
-
-    <ImageView
-        android:id="@+id/image_popup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/linear_holder"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:layout_toEndOf="@+id/text_popup"/>
+            <ImageView
+                android:id="@+id/image_popup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/linear_holder"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_toEndOf="@+id/text_popup"/>-->
 
 
     <LinearLayout
