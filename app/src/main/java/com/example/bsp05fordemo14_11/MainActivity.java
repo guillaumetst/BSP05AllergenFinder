@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("wtf", "lol");
         button_capture = findViewById(R.id.button_capture);
         button_profile = findViewById(R.id.button_profile);
         textview_data = findViewById(R.id.text_data);

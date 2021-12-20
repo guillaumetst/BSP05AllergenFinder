@@ -28,9 +28,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/image_popup"
-        android:text=""
-        android:textSize="22sp"
         android:layout_centerHorizontal="true"
-        android:padding="16dp"/>
+        android:padding="16dp"
+        android:text=""
+        android:textSize="22sp" />
 
 </RelativeLayout>
