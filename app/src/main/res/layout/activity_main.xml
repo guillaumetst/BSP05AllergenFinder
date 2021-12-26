@@ -98,7 +98,13 @@
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="@string/text_intro"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <ImageView
         android:id="@+id/image_result"
@@ -106,7 +112,11 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/text_data"
         android:layout_marginTop="16dp" />
+
     <!--
+
+
+
         <TextView
             android:id="@+id/text_popup"
             android:layout_width="wrap_content"
