@@ -101,9 +101,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
 
-        checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE);
 
-        if (!sharedPreferences.getBoolean(this.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+        if (!sharedPreferences.getBoolean(COMPLETED_ONBOARDING_PREF_NAME, false)) {
             // The user hasn't seen the OnboardingSupportFragment yet, so show it
             startActivity(new Intent(getApplicationContext(),OnboardingActivity.class));
         }
@@ -112,9 +111,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();;
                 startCameraX(cameraProvider);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
         }, getExecutor());
@@ -126,11 +123,17 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
+//        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_READ_PERMISSION_CODE);
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_WRITE_PERMISSION_CODE);
+        checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE);
+
         button_capture.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_WRITE_PERMISSION_CODE);
-                checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_READ_PERMISSION_CODE);
+            public void onClick(View v) {
+                String path = capturePhoto();
+                Bitmap bitmap = BitmapFactory.decodeFile(path);
+                getTextFromImage(bitmap);
+                image_result.setImageBitmap(bitmap);
             }
         });
 
@@ -143,7 +146,41 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void checkPermission(String permission, int requestCode) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] {permission}, requestCode);
+        } else{
+            Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT) .show();
+            } else {
+                Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT) .show();
+            }
+        }
+        else if (requestCode == STORAGE_WRITE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Storage Write Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Storage Write Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == STORAGE_READ_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Storage Write Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Storage Write Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+/*
     public void checkPermission(String permission, int requestCode) {
         if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
             // Requesting the permission
@@ -151,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
-            String imgPath = capturePhoto();
+            //String imgPath = capturePhoto();
+            capturePhoto();
         }
     }
 
@@ -176,6 +214,21 @@ public class MainActivity extends AppCompatActivity {
         // Other 'case' lines to check for other
         // permissions this app might request.
     }
+
+
+    @Override
+    public void onClick(View view){
+        switch (view.getId()){
+            case R.id.button_capture:
+                Bitmap captured_image = capturePhoto();
+                getTextFromImage(captured_image);
+                break;
+            case R.id.button_profile:
+                startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
+                break;
+        }
+    }
+    */
 
 
     private Executor getExecutor() {
@@ -203,20 +256,9 @@ public class MainActivity extends AppCompatActivity {
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture);
     }
 
-//    @Override
-//    public void onClick(View view){
-//        switch (view.getId()){
-//            case R.id.button_capture:
-//                Bitmap captured_image = capturePhoto();
-//                getTextFromImage(captured_image);
-//                break;
-//            case R.id.button_profile:
-//                startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
-//                break;
-//        }
-//    }
 
-    private void capturePhoto() {
+
+    private String capturePhoto() {
         File photoDir = new File("/mnt/sdcard/Pictures/CameraXPhotos");
 
         if(!photoDir.exists())
@@ -244,9 +286,11 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-        getTextFromImage(bitmap);
-        image_result.setImageBitmap(bitmap);
+//        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+//        getTextFromImage(bitmap);
+//        image_result.setImageBitmap(bitmap);
+
+        return photoFilePath;
  }
 
     @Override
