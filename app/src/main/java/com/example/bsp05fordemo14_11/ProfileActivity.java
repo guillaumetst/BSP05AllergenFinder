@@ -3,12 +3,10 @@ package com.example.bsp05fordemo14_11;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -138,128 +136,7 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
         }
-
-        /*
-        switch_gluten.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("gluten");
-                }
-                else{
-                    userAllergens.remove("gluten");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_gluten", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_lactose.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("lactose");
-                }
-                else{
-                    userAllergens.remove("lactose");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_lactose", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_eggs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("eggs");
-                }
-                else{
-                    userAllergens.remove("eggs");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_eggs", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_moluscs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("moluscs");
-                }
-                else{
-                    userAllergens.remove("moluscs");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_moluscs", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_fish.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("fish");
-                }
-                else{
-                    userAllergens.remove("fish");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_fish", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_soy.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("soy");
-                }
-                else{
-                    userAllergens.remove("soy");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_soy", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });
-
-        switch_nuts.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(isChecked){
-                    userAllergens.add("nuts");
-                }
-                else{
-                    userAllergens.remove("nuts");
-                }
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("switch_nuts", isChecked);
-                editor.apply();
-                refreshAllergens();
-            }
-        });*/
     }
-
 
     public void refreshAllergens(){
         StringBuffer sb = new StringBuffer();

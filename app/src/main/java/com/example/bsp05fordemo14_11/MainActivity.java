@@ -1,7 +1,6 @@
 package com.example.bsp05fordemo14_11;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.camera.core.CameraSelector;
@@ -21,16 +20,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -48,7 +43,6 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -61,23 +55,18 @@ public class MainActivity extends AppCompatActivity {
     private Button button_capture;
     private Button button_profile;
 
-    private TextView textview_data;
-    private Bitmap bitmap;
 
     private ImageView image_result;
     private ImageView image_popup;
     private TextView text_popup;
     private RelativeLayout popup_window_layout;
 
-    private static final int REQUEST_CAMERA_CODE = 100;
 
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     PreviewView previewView;
     private ImageCapture imageCapture;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
-    private static final int STORAGE_WRITE_PERMISSION_CODE = 101;
-    private static final int STORAGE_READ_PERMISSION_CODE = 102;
 
 
     @Override
@@ -89,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
         button_capture = findViewById(R.id.button_capture);
         button_profile = findViewById(R.id.button_profile);
-        textview_data = findViewById(R.id.text_data);
         image_result = findViewById(R.id.image_result);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -98,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
 
         checkPermission(Manifest.permission.CAMERA,CAMERA_PERMISSION_CODE);
-        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_WRITE_PERMISSION_CODE);
 
         if (!sharedPreferences.getBoolean(COMPLETED_ONBOARDING_PREF_NAME, false)) {
             // The user hasn't seen the OnboardingSupportFragment yet, so show it
@@ -114,23 +101,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }, getExecutor());
 
+        image_result.setImageBitmap(null);
 
         button_capture.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(MainActivity.this);
+            public void onClick(View v)
+            {
+                capturePhoto();
             }
         });
-
-//        image_result.setImageBitmap(null);
-//
-//        button_capture.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                capturePhoto();
-//            }
-//        });
 
         button_profile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkPermission(String permission, int requestCode){
         if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-            // Requesting the permission
             ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
         }
         else {
@@ -160,20 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT) .show();
             }
         }
-        else if (requestCode == STORAGE_WRITE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivity.this, "Storage Write Permission Granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Storage Write Permission Denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-        else if (requestCode == STORAGE_READ_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivity.this, "Storage Write Permission Granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Storage Write Permission Denied", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     private String capturePhoto() {
@@ -186,18 +150,23 @@ public class MainActivity extends AppCompatActivity {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-                        // insert your code here.
                         Log.d("PHOTO", "onImageSaved: "+imagePath);
                         Toast.makeText(MainActivity.this, "Photo has been taken", Toast.LENGTH_SHORT).show();
                         Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-                        getTextFromImage(bitmap);
+                        bitmap = RotateBitmap(bitmap, 90);
                         image_result.setImageBitmap(bitmap);
-//                        image_result.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-                        image_result.setRotation(90);
+                        getTextFromImage(bitmap);
+
+                        if (image.exists()) {
+                            if (image.delete()) {
+                                System.out.println("file Deleted :" + imagePath);
+                            } else {
+                                System.out.println("file not Deleted :" + imagePath);
+                            }
+                        }
                     }
                     @Override
                     public void onError(ImageCaptureException error) {
-                        // insert your code here.
                         Log.d("PHOTO", "onError: " + error);
                         Toast.makeText(MainActivity.this, "Error taking photo: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -205,115 +174,6 @@ public class MainActivity extends AppCompatActivity {
 
         return imagePath;
     }
-
-//    private void capturePhoto() {
-//
-//        File photoDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//        if(!photoDir.exists()){
-//            this.finishAffinity();
-//        }
-//
-//        File appPhotoDir = new File(photoDir + "/AllergenApp");
-//
-//        if(!appPhotoDir.exists())
-//            appPhotoDir.mkdir();
-//
-//        Date date = new Date();
-//        String timestamp = String.valueOf(date.getTime());
-////        String photoFilePath = photoDir.getAbsolutePath() + "/" + timestamp + ".jpg";
-//        String filename = "/" + timestamp + ".jpg";
-//
-//        File photoFile = new File(appPhotoDir, filename);
-//
-////        File photoFile = new File(photoFilePath);
-//
-//        imageCapture.takePicture(
-//                new ImageCapture.OutputFileOptions.Builder(photoFile).build(),
-//                getExecutor(),
-//                new ImageCapture.OnImageSavedCallback() {
-//                    @Override
-//                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-//                        Toast.makeText(MainActivity.this, "Photo has been taken", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onError(@NonNull ImageCaptureException exception) {
-//                        Toast.makeText(MainActivity.this, "Error taking photo: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//        );
-//
-//        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-//        getTextFromImage(bitmap);
-//        image_result.setImageBitmap(bitmap);
-
-//        return photoFilePath;
-// }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK){
-                Uri resultUri = result.getUri();
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), resultUri);
-                    getTextFromImage(bitmap);
-                    image_result.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (requestCode == 7 && resultCode == RESULT_OK) {
-                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                image_result.setImageBitmap(bitmap);
-            }
-        }
-    }
-
-//    public void capturePicture() {
-//        File photoFile = null;
-//        try {
-//            photoFile = createImageFile();
-//        } catch (IOException ex) {
-//            Toast.makeText(MainActivity.this, "Error creating photo File: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
-//        }
-//        if (photoFile != null) {
-//            ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
-//            imageCapture.takePicture(outputFileOptions, getExecutor(),
-//                    new ImageCapture.OnImageSavedCallback() {
-//                        @Override
-//                        public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-//                            getTextFromImage(outputFileResults);
-//                        }
-//
-//                        @Override
-//                        public void onError(ImageCaptureException error) {
-//                            Toast.makeText(MainActivity.this, "Error taking photo: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//            );
-//        }
-//    }
-
-//    String currentPhotoPath;
-//
-//    private File createImageFile() throws IOException {
-//        // Create an image file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String imageFileName = "JPEG_" + timeStamp + "_";
-//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-//        File image = File.createTempFile(
-//                imageFileName,  /* prefix */
-//                ".jpg",         /* suffix */
-//                storageDir      /* directory */
-//        );
-//
-//        // Save a file: path for use with ACTION_VIEW intents
-//        currentPhotoPath = image.getAbsolutePath();
-//        return image;
-//    }
 
 
     private void getTextFromImage(Bitmap bitmap){
@@ -331,9 +191,8 @@ public class MainActivity extends AppCompatActivity {
                 stringBuilder.append("\n");
             }
 
-            //textview_data.setText(stringBuilder.toString());
             button_capture.setText("Retake");
-            //detectKeyword((String) textview_data.getText());
+            Log.d("DETECTION", "Text: "+stringBuilder.toString());
             detectKeyword((String) stringBuilder.toString());
         }
     }
@@ -351,18 +210,21 @@ public class MainActivity extends AppCompatActivity {
 
 
         ArrayList<String> userAllergens = ProfileActivity.returnUserAllergens();
+        ArrayList<String> detected = new ArrayList<>();
         Map<String, String[]> allergenKeywords = ProfileActivity.returnAllergens();
 
         Integer counter = 0;
-
+        Log.d("DETECTION", "User Allergens: "+userAllergens);
         for(Map.Entry<String, String[]> entry : allergenKeywords.entrySet())
         {
-            String key = entry.getKey();
 
-            if(userAllergens.contains(key))
+            String key = entry.getKey();
+            Log.d("DETECTION", "Current Allergen category: "+key);
+            if(userAllergens.contains(key) && !detected.contains(key))
             {
                 for (String value : entry.getValue())
                 {
+                    Log.d("DETECTION", "Checking for "+value);
                     if (text.toLowerCase(Locale.ROOT).contains(value))
                     {
                         counter += 1;
@@ -370,12 +232,13 @@ public class MainActivity extends AppCompatActivity {
                         modifyText = text_popup.getText().toString();
                         modifyText = modifyText + String.format("Product contains %s!\n", key);
                         text_popup.setText(modifyText);
-                        userAllergens.remove(new String(key));
+                        detected.add(new String(key));
                         break;
                     }
                 }
             }
         }
+
         if(counter==0){
             text_popup.setText("Product does not seem to contain any of the selected allergens!");
             image_popup.setImageDrawable(getDrawable(R.drawable.ic_baseline_check_24));
@@ -425,6 +288,17 @@ public class MainActivity extends AppCompatActivity {
         imageCapture = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();
 
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture);
+    }
+
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    public static Bitmap RotateBitmap(Bitmap source, float angle)
+    {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
 }
