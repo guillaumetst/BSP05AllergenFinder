@@ -15,24 +15,22 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.Manifest;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -52,8 +50,6 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -101,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
 
+        checkPermission(Manifest.permission.CAMERA,CAMERA_PERMISSION_CODE);
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_WRITE_PERMISSION_CODE);
 
         if (!sharedPreferences.getBoolean(COMPLETED_ONBOARDING_PREF_NAME, false)) {
             // The user hasn't seen the OnboardingSupportFragment yet, so show it
@@ -116,26 +114,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }, getExecutor());
 
-//        button_capture.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(MainActivity.this);
-//            }
-//        });
-
-//        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_READ_PERMISSION_CODE);
-        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_WRITE_PERMISSION_CODE);
-        checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE);
 
         button_capture.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                String path = capturePhoto();
-                Bitmap bitmap = BitmapFactory.decodeFile(path);
-                getTextFromImage(bitmap);
-                image_result.setImageBitmap(bitmap);
+            public void onClick(View view) {
+                CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(MainActivity.this);
             }
         });
+
+//        image_result.setImageBitmap(null);
+//
+//        button_capture.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                capturePhoto();
+//            }
+//        });
 
         button_profile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,13 +138,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
             }
         });
-
     }
 
-    private void checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] {permission}, requestCode);
-        } else{
+    public void checkPermission(String permission, int requestCode){
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
+            // Requesting the permission
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+        }
+        else {
             Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
         }
     }
@@ -180,118 +176,79 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-/*
-    public void checkPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
-            // Requesting the permission
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
-        }
-        else {
-            Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
-            //String imgPath = capturePhoto();
-            capturePhoto();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted. Continue the action or workflow
-                    // in your app.
-                    capturePhoto();
-                }  else {
-                    // Explain to the user that the feature is unavailable because
-                    // the features requires a permission that the user has denied.
-                    // At the same time, respect the user's decision. Don't link to
-                    // system settings in an effort to convince the user to change
-                    // their decision.
-                }
-                return;
-        }
-        // Other 'case' lines to check for other
-        // permissions this app might request.
-    }
-
-
-    @Override
-    public void onClick(View view){
-        switch (view.getId()){
-            case R.id.button_capture:
-                Bitmap captured_image = capturePhoto();
-                getTextFromImage(captured_image);
-                break;
-            case R.id.button_profile:
-                startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
-                break;
-        }
-    }
-    */
-
-
-    private Executor getExecutor() {
-        return ContextCompat.getMainExecutor(this);
-    }
-
-    private void startCameraX(ProcessCameraProvider cameraProvider) {
-        cameraProvider.unbindAll();
-
-        // Camera selector use case
-        CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build();
-
-        // Preview use case
-        Preview preview = new Preview.Builder().build();
-
-        preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-        // Image capture use case
-        imageCapture = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .build();
-
-        cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture);
-    }
-
-
-
     private String capturePhoto() {
-        File photoDir = new File("/mnt/sdcard/Pictures/CameraXPhotos");
+        String imagePath = getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg";
+        File image = new File(imagePath);
 
-        if(!photoDir.exists())
-            photoDir.mkdir();
+        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(image).build();
 
-        Date date = new Date();
-        String timestamp = String.valueOf(date.getTime());
-        String photoFilePath = photoDir.getAbsolutePath() + "/" + timestamp + ".jpg";
-
-        File photoFile = new File(photoFilePath);
-
-        imageCapture.takePicture(
-                new ImageCapture.OutputFileOptions.Builder(photoFile).build(),
-                getExecutor(),
+        imageCapture.takePicture(outputFileOptions, getExecutor(),
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                    public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+                        // insert your code here.
+                        Log.d("PHOTO", "onImageSaved: "+imagePath);
                         Toast.makeText(MainActivity.this, "Photo has been taken", Toast.LENGTH_SHORT).show();
+                        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+                        getTextFromImage(bitmap);
+                        image_result.setImageBitmap(bitmap);
+//                        image_result.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+                        image_result.setRotation(90);
                     }
-
                     @Override
-                    public void onError(@NonNull ImageCaptureException exception) {
-                        Toast.makeText(MainActivity.this, "Error taking photo: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                    public void onError(ImageCaptureException error) {
+                        // insert your code here.
+                        Log.d("PHOTO", "onError: " + error);
+                        Toast.makeText(MainActivity.this, "Error taking photo: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                }
-        );
+                });
 
+        return imagePath;
+    }
+
+//    private void capturePhoto() {
+//
+//        File photoDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//        if(!photoDir.exists()){
+//            this.finishAffinity();
+//        }
+//
+//        File appPhotoDir = new File(photoDir + "/AllergenApp");
+//
+//        if(!appPhotoDir.exists())
+//            appPhotoDir.mkdir();
+//
+//        Date date = new Date();
+//        String timestamp = String.valueOf(date.getTime());
+////        String photoFilePath = photoDir.getAbsolutePath() + "/" + timestamp + ".jpg";
+//        String filename = "/" + timestamp + ".jpg";
+//
+//        File photoFile = new File(appPhotoDir, filename);
+//
+////        File photoFile = new File(photoFilePath);
+//
+//        imageCapture.takePicture(
+//                new ImageCapture.OutputFileOptions.Builder(photoFile).build(),
+//                getExecutor(),
+//                new ImageCapture.OnImageSavedCallback() {
+//                    @Override
+//                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+//                        Toast.makeText(MainActivity.this, "Photo has been taken", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onError(@NonNull ImageCaptureException exception) {
+//                        Toast.makeText(MainActivity.this, "Error taking photo: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//        );
+//
 //        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
 //        getTextFromImage(bitmap);
 //        image_result.setImageBitmap(bitmap);
 
-        return photoFilePath;
- }
+//        return photoFilePath;
+// }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -308,8 +265,56 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+            if (requestCode == 7 && resultCode == RESULT_OK) {
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                image_result.setImageBitmap(bitmap);
+            }
         }
     }
+
+//    public void capturePicture() {
+//        File photoFile = null;
+//        try {
+//            photoFile = createImageFile();
+//        } catch (IOException ex) {
+//            Toast.makeText(MainActivity.this, "Error creating photo File: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+//        }
+//        if (photoFile != null) {
+//            ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+//            imageCapture.takePicture(outputFileOptions, getExecutor(),
+//                    new ImageCapture.OnImageSavedCallback() {
+//                        @Override
+//                        public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+//                            getTextFromImage(outputFileResults);
+//                        }
+//
+//                        @Override
+//                        public void onError(ImageCaptureException error) {
+//                            Toast.makeText(MainActivity.this, "Error taking photo: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//            );
+//        }
+//    }
+
+//    String currentPhotoPath;
+//
+//    private File createImageFile() throws IOException {
+//        // Create an image file name
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String imageFileName = "JPEG_" + timeStamp + "_";
+//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        File image = File.createTempFile(
+//                imageFileName,  /* prefix */
+//                ".jpg",         /* suffix */
+//                storageDir      /* directory */
+//        );
+//
+//        // Save a file: path for use with ACTION_VIEW intents
+//        currentPhotoPath = image.getAbsolutePath();
+//        return image;
+//    }
+
 
     private void getTextFromImage(Bitmap bitmap){
         TextRecognizer recognizer = new TextRecognizer.Builder(this).build();
@@ -381,13 +386,11 @@ public class MainActivity extends AppCompatActivity {
             popup_window_layout.setBackgroundColor(getResources().getColor(R.color.red_pastel));
         }
 
-
-
         // create the popup window
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        //boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height/*, focusable*/);
 
         // show the popup window
         // which view you pass in doesn't matter, it is only used for the window tolken
@@ -398,7 +401,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                image_result.setImageBitmap(null);
             }
         });
     }
+
+    private Executor getExecutor() {
+        return ContextCompat.getMainExecutor(this);
+    }
+
+    private void startCameraX(ProcessCameraProvider cameraProvider) {
+        cameraProvider.unbindAll();
+
+        // Camera selector use case
+        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
+
+        // Preview use case
+        Preview preview = new Preview.Builder().build();
+
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+        // Image capture use case
+        imageCapture = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();
+
+        cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture);
+    }
+
 }
