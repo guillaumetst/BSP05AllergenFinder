@@ -6,60 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ScrollView
-        android:id="@+id/scroll_view"
+    <TextView
+        android:id="@+id/text_data"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/image_result"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp">
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/text_intro"
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
 
-        <TextView
-            android:id="@+id/text_data"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Welcome to the AllergenFinder please use the camera to take a picture."
-            android:textSize="20sp" />
-    </ScrollView>
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ImageView
         android:id="@+id/image_result"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/text_popup" />
-
-    <TextView
-        android:id="@+id/text_popup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/linear_holder"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:text=""
-        android:textSize="20sp" />
-
-    <ImageView
-        android:id="@+id/image_popup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/linear_holder"
-        android:layout_below="@+id/image_result"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:layout_toEndOf="@+id/text_popup"
-        />
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"/>
 
     <LinearLayout
         android:id="@+id/linear_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp">
 
         <Button
             android:id="@+id/button_capture"
@@ -67,6 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="1"
+            android:background="@drawable/rounded_button"
             android:text="Capture" />
 
         <Button
@@ -75,17 +50,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="1"
+            android:background="@drawable/rounded_button"
             android:text="Set Allergens" />
-        <!--
-        <Button
-            android:visibility="gone"
-            android:id="@+id/button_copy"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Copy"
-            android:layout_margin="8dp"/>
-        -->
     </LinearLayout>
 
 </RelativeLayout>

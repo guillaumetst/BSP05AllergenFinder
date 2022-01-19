@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">BSP05 for Demo 14-11</string>
+    <!--Main-->
+    <string name="text_intro">Welcome to the AllergenFinder please use the camera to take a picture.</string>
+
+
+
+    <!--Profile-->
+    <string name="text_profile">Please select your allergens</string>
+    <string name="text_allergen_recap">List of allergens that you have selected:</string>
+    <string name="button_profile">Confirm and go back</string>
+    <string name="switch_gluten">Gluten</string>
+    <string name="switch_lactose">Lactose</string>
+    <string name="switch_eggs">Eggs</string>
+    <string name="switch_moluscs">Moluscs</string>
+    <string name="switch_fish">Fish</string>
+    <string name="switch_soy">Soy</string>
+    <string name="switch_nuts">Nuts</string>
 </resources>
