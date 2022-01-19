@@ -6,7 +6,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.example.bsp05fordemo14_11"
+        applicationId "com.example.AllergenFinder_BSP05"
         minSdk 23
         targetSdk 31
         versionCode 1

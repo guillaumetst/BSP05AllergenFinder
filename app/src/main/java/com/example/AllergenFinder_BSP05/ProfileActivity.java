@@ -1,4 +1,4 @@
-package com.example.bsp05fordemo14_11;
+package com.example.AllergenFinder_BSP05;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
