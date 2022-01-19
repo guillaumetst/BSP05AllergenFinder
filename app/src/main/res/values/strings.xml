@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BSP05 for Demo 14-11</string>
+    <string name="app_name">AllergenFinder-BSP05</string>
     <!--Main-->
     <string name="text_intro">Welcome to the AllergenFinder please use the camera to take a picture.</string>
 

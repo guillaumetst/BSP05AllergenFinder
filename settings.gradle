@@ -6,5 +6,5 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "BSP05 for Demo 14-11"
+rootProject.name = "AllergenFinder-BSP05"
 include ':app'
