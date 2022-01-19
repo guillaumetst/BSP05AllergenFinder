@@ -40,11 +40,10 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        button_confirm = findViewById(R.id.button_confirm);
+
         userAllergens = new ArrayList<String>();
         Map<SwitchCompat, String> allergenTypes = new HashMap<SwitchCompat, String>();
-
-
-        button_confirm = findViewById(R.id.button_confirm);
 
         switch_gluten = findViewById(R.id.switch_gluten);
         switch_lactose = findViewById(R.id.switch_lactose);
@@ -77,8 +76,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         boolean silent_gluten = settings.getBoolean("switch_gluten", false);
         switch_gluten.setChecked(silent_gluten);
-        //Log.d("PREF_SWITCH_GLUTEN", String.valueOf(silent_gluten));
-        //Log.d("REAL_SWITCH_GLUTEN", String.valueOf(switch_gluten));
         if (switch_gluten.isChecked()){ userAllergens.add("gluten");}
 
         boolean silent_lactose = settings.getBoolean("switch_lactose", false);
@@ -156,9 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    public static ArrayList<String> returnUserAllergens(){
-        return (ArrayList<String>) userAllergens;
-    }
+    public static ArrayList<String> returnUserAllergens(){ return (ArrayList<String>) userAllergens; }
 
     public static Map<String, String[]> returnAllergens(){
         return allergenKeywords;

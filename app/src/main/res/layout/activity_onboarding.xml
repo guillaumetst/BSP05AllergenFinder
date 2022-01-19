@@ -22,7 +22,4 @@
         android:text="Continue"
         android:layout_marginBottom="64dp"/>
 
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

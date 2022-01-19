@@ -6,7 +6,7 @@
     android:layout_marginRight="16dp"
     android:layout_marginLeft="16dp"
     android:layout_height="wrap_content"
-    android:background="@color/grey">
+    android:background="@drawable/dialog_bg">
 
     <ImageButton
         android:id="@+id/close_popup"

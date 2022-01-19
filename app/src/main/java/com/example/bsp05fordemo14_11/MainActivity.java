@@ -50,17 +50,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
-    static final String COMPLETED_ONBOARDING_PREF_NAME = "onboardingCompletion";
-
     private Button button_capture;
     private Button button_profile;
-
 
     private ImageView image_result;
     private ImageView image_popup;
     private TextView text_popup;
     private RelativeLayout popup_window_layout;
-
 
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     PreviewView previewView;
@@ -68,33 +64,38 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
 
+    static final String COMPLETED_ONBOARDING_PREF_NAME = "onboardingCompletion";
 
+    /* To be run on start-up */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
 
+        /* Button and Layout Setup */
         setContentView(R.layout.activity_main);
 
         button_capture = findViewById(R.id.button_capture);
         button_profile = findViewById(R.id.button_profile);
         image_result = findViewById(R.id.image_result);
 
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        previewView = findViewById(R.id.preview_view);
-
+        /* Onboarding Setup*/
         SharedPreferences sharedPreferences = getSharedPreferences(COMPLETED_ONBOARDING_PREF_NAME, 0);
-
-        checkPermission(Manifest.permission.CAMERA,CAMERA_PERMISSION_CODE);
 
         if (!sharedPreferences.getBoolean(COMPLETED_ONBOARDING_PREF_NAME, false)) {
             // The user hasn't seen the OnboardingSupportFragment yet, so show it
             startActivity(new Intent(getApplicationContext(),OnboardingActivity.class));
         }
 
+        /* Camera Setup */
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        previewView = findViewById(R.id.preview_view);
+
+        checkPermission(Manifest.permission.CAMERA,CAMERA_PERMISSION_CODE);
+
         cameraProviderFuture.addListener(() -> {
             try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();;
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 startCameraX(cameraProvider);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -103,20 +104,11 @@ public class MainActivity extends AppCompatActivity {
 
         image_result.setImageBitmap(null);
 
-        button_capture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                capturePhoto();
-            }
-        });
+        button_capture.setOnClickListener(v -> capturePhoto());
 
-        button_profile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),ProfileActivity.class));
-            }
-        });
+        button_profile.setOnClickListener(v ->
+                startActivity(new Intent(getApplicationContext(),ProfileActivity.class))
+        );
     }
 
     public void checkPermission(String permission, int requestCode){
@@ -140,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String capturePhoto() {
+    private void capturePhoto() {
         String imagePath = getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg";
         File image = new File(imagePath);
 
@@ -171,8 +163,6 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Error taking photo: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
-        return imagePath;
     }
 
 
@@ -199,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void detectKeyword(String text) {
 
+        /* Inflate the layout of the popup window */
         /* https://stackoverflow.com/questions/5944987/how-to-create-a-popup-window-popupwindow-in-android */
-        // inflate the layout of the popup window
         LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_window, null);
         ImageButton close_popup = popupView.findViewById(R.id.close_popup);
@@ -212,19 +202,14 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> userAllergens = ProfileActivity.returnUserAllergens();
         ArrayList<String> detected = new ArrayList<>();
         Map<String, String[]> allergenKeywords = ProfileActivity.returnAllergens();
+        int counter = 0;
 
-        Integer counter = 0;
-        Log.d("DETECTION", "User Allergens: "+userAllergens);
         for(Map.Entry<String, String[]> entry : allergenKeywords.entrySet())
         {
-
             String key = entry.getKey();
-            Log.d("DETECTION", "Current Allergen category: "+key);
             if(userAllergens.contains(key) && !detected.contains(key))
             {
-                for (String value : entry.getValue())
-                {
-                    Log.d("DETECTION", "Checking for "+value);
+                for (String value : entry.getValue()) {
                     if (text.toLowerCase(Locale.ROOT).contains(value))
                     {
                         counter += 1;
@@ -232,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                         modifyText = text_popup.getText().toString();
                         modifyText = modifyText + String.format("Product contains %s!\n", key);
                         text_popup.setText(modifyText);
-                        detected.add(new String(key));
+                        detected.add(key);
                         break;
                     }
                 }
@@ -249,23 +234,19 @@ public class MainActivity extends AppCompatActivity {
             popup_window_layout.setBackgroundColor(getResources().getColor(R.color.red_pastel));
         }
 
-        // create the popup window
+        /* Create the popup window */
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         //boolean focusable = true; // lets taps outside the popup also dismiss it
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height/*, focusable*/);
 
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
+        /* Show the popup window */
         popupWindow.showAtLocation(image_result, Gravity.CENTER, 0, 0);
 
-        // dismiss the popup window when touched
-        close_popup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-                image_result.setImageBitmap(null);
-            }
+        /* Dismiss the popup window when touched */
+        close_popup.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            image_result.setImageBitmap(null);
         });
     }
 
@@ -276,17 +257,18 @@ public class MainActivity extends AppCompatActivity {
     private void startCameraX(ProcessCameraProvider cameraProvider) {
         cameraProvider.unbindAll();
 
-        // Camera selector use case
+        /* Camera selector */
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
 
-        // Preview use case
+        /* Preview use case */
         Preview preview = new Preview.Builder().build();
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-        // Image capture use case
+        /* Image capture use case */
         imageCapture = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();
 
+        /* Bind to lifecycle */
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, imageCapture);
     }
 
